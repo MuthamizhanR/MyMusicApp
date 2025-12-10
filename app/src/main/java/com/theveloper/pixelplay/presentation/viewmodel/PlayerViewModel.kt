@@ -3381,7 +3381,7 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    fun performSearch(query: String) {
+   fun performSearch(query: String) {
         viewModelScope.launch {
             try {
                 if (query.isBlank()) {
@@ -3389,24 +3389,39 @@ class PlayerViewModel @Inject constructor(
                     return@launch
                 }
 
-                val currentFilter = _playerUiState.value.selectedSearchFilter
-
-                val resultsList: List<SearchResultItem> = withContext(Dispatchers.IO) {
-                    musicRepository.searchAll(query, currentFilter).first()
+                // --- CHANGED: Search YouTube instead of Local DB ---
+                val ytResults = withContext(Dispatchers.IO) {
+                     YouTubeHelper.search(query)
                 }
 
-                _playerUiState.update { it.copy(searchResults = resultsList.toImmutableList()) }
+                // Convert YouTube results to "Song" objects
+                val convertedSongs = ytResults.map { ytSong ->
+                    Song.emptySong().copy(
+                        id = ytSong.videoId,
+                        title = ytSong.title,
+                        artist = ytSong.artist,
+                        album = "YouTube",
+                        albumArtUriString = ytSong.thumbnail,
+                        contentUriString = "https://www.youtube.com/watch?v=${ytSong.videoId}",
+                        path = "online"
+                    )
+                }
+
+                // We have to wrap them in "SearchResultItem" so the UI accepts them
+                // Note: We are assuming SearchResultItem.Song(song) exists based on standard app patterns
+                // If this causes a red line, we might need to check SearchResultItem structure.
+                val searchItems = convertedSongs.map { com.theveloper.pixelplay.data.model.SearchResultItem.SongItem(it) }
+                
+                _playerUiState.update { it.copy(searchResults = searchItems.toImmutableList()) }
+                // ---------------------------------------------------
 
             } catch (e: Exception) {
                 Log.e("PlayerViewModel", "Error performing search for query: $query", e)
-                _playerUiState.update {
-                    it.copy(
-                        searchResults = persistentListOf(),
-                    )
-                }
+                _playerUiState.update { it.copy(searchResults = persistentListOf()) }
             }
         }
     }
+
 
     fun deleteSearchHistoryItem(query: String) {
         viewModelScope.launch {
