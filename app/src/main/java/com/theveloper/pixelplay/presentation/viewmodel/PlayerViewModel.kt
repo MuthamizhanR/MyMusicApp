@@ -3381,11 +3381,34 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-   fun performSearch(query: String) {
+    fun performSearch(query: String) {
         viewModelScope.launch {
             try {
                 if (query.isBlank()) {
                     _playerUiState.update { it.copy(searchResults = persistentListOf()) }
+                    return@launch
+                }
+                val ytResults = withContext(Dispatchers.IO) {
+                     com.theveloper.pixelplay.data.remote.YouTubeHelper.search(query)
+                }
+                val convertedSongs = ytResults.map { ytSong ->
+                    com.theveloper.pixelplay.data.model.Song.emptySong().copy(
+                        id = ytSong.videoId,
+                        title = ytSong.title,
+                        artist = ytSong.artist,
+                        album = "YouTube",
+                        albumArtUriString = ytSong.thumbnail,
+                        contentUriString = "https://www.youtube.com/watch?v=" + ytSong.videoId,
+                        path = "online"
+                    )
+                }
+                val searchItems = convertedSongs.map { com.theveloper.pixelplay.data.model.SearchResultItem.SongItem(it) }
+                _playerUiState.update { it.copy(searchResults = searchItems.toImmutableList()) }
+            } catch (e: Exception) {
+                _playerUiState.update { it.copy(searchResults = persistentListOf()) }
+            }
+        }
+    }
                     return@launch
                 }
 
