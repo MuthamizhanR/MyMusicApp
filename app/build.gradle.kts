@@ -73,6 +73,7 @@ android {
 
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+    implementation("com.github.TeamNewPipe:NewPipeExtractor:v0.24.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -1,5 +1,5 @@
 package com.theveloper.pixelplay.presentation.viewmodel
-
+import com.theveloper.pixelplay.data.remote.YouTubeHelper
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
@@ -2431,27 +2431,49 @@ class PlayerViewModel @Inject constructor(
     }
 
 
-    private fun loadAndPlaySong(song: Song) {
+   private fun loadAndPlaySong(song: Song) {
         val controller = mediaController
         if (controller == null) {
-            pendingPlaybackAction = {
-                loadAndPlaySong(song)
-            }
+            pendingPlaybackAction = { loadAndPlaySong(song) }
             return
         }
 
-        val mediaItem = MediaItem.Builder()
-            .setMediaId(song.id)
-            .setUri(song.contentUriString.toUri())
-            .setMediaMetadata(buildMediaMetadataForSong(song))
-            .build()
-        if (controller.currentMediaItem?.mediaId == song.id) {
-            if (!controller.isPlaying) controller.play()
-        } else {
-            controller.setMediaItem(mediaItem)
-            controller.prepare()
-            controller.play()
+        // --- NEW LOGIC START ---
+        viewModelScope.launch(Dispatchers.IO) {
+            // Check if it's an online song (has a videoId stored in the ID)
+            val realUri = if (song.path == "online" || song.contentUriString.contains("youtube")) {
+                 // Fetch real audio URL from YouTube
+                 val streamUrl = YouTubeHelper.getAudioUrl(song.id)
+                 if (streamUrl.isNotEmpty()) Uri.parse(streamUrl) else null
+            } else {
+                 // It's a local file, use as is
+                 song.contentUriString.toUri()
+            }
+
+            if (realUri != null) {
+                withContext(Dispatchers.Main) {
+                    val mediaItem = MediaItem.Builder()
+                        .setMediaId(song.id)
+                        .setUri(realUri) // Use the resolved URL
+                        .setMediaMetadata(buildMediaMetadataForSong(song))
+                        .build()
+
+                    if (controller.currentMediaItem?.mediaId == song.id) {
+                        if (!controller.isPlaying) controller.play()
+                    } else {
+                        controller.setMediaItem(mediaItem)
+                        controller.prepare()
+                        controller.play()
+                    }
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    sendToast("Could not play: ${song.title}")
+                }
+            }
         }
+        // --- NEW LOGIC END ---
+
         _stablePlayerState.update { it.copy(currentSong = song, isPlaying = true) }
         viewModelScope.launch {
             song.albumArtUriString?.toUri()?.let { uri ->

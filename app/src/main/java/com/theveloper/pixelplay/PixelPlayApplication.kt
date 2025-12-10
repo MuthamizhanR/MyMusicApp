@@ -1,4 +1,9 @@
 package com.theveloper.pixelplay
+import org.schabi.newpipe.extractor.NewPipe
+import org.schabi.newpipe.extractor.downloader.Downloader
+import org.schabi.newpipe.extractor.downloader.Request
+import org.schabi.newpipe.extractor.downloader.Response
+import okhttp3.OkHttpClient
 
 import android.app.Application
 import android.app.NotificationChannel
@@ -30,6 +35,24 @@ class PixelPlayApplication : Application(), ImageLoaderFactory, Configuration.Pr
 
     override fun onCreate() {
         super.onCreate()
+        // Initialize the YouTube Engine
+        NewPipe.init(object : Downloader() {
+            val client = OkHttpClient.Builder().build()
+            override fun execute(request: Request): Response {
+                val builder = okhttp3.Request.Builder().url(request.url())
+                request.headers().forEach { (key, list) ->
+                    list.forEach { value -> builder.addHeader(key, value) }
+                }
+                val response = client.newCall(builder.build()).execute()
+                return Response(
+                    response.code,
+                    response.message,
+                    response.headers.toMultimap(),
+                    response.body?.byteStream(),
+                    response.body?.string()
+                )
+            }
+        })
 
 //        if (BuildConfig.DEBUG) {
 //            Timber.plant(Timber.DebugTree())
