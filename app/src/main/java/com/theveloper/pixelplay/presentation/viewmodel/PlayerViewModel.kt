@@ -3438,12 +3438,12 @@ class PlayerViewModel @Inject constructor(
                 _playerUiState.update { it.copy(searchResults = searchItems.toImmutableList()) }
                 // ---------------------------------------------------
 
-            } catch (e: Exception) {
+             catch (e: Exception) {
                 Log.e("PlayerViewModel", "Error performing search for query: $query", e)
                 _playerUiState.update { it.copy(searchResults = persistentListOf()) }
             }
-        }
-    }
+        
+    
 
 
     fun deleteSearchHistoryItem(query: String) {
@@ -4212,4 +4212,4 @@ class PlayerViewModel @Inject constructor(
     fun resetLyricsSearchState() {
         _lyricsSearchUiState.value = LyricsSearchUiState.Idle
     }
-}
+
