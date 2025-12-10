@@ -1,11 +1,10 @@
 plugins {
-    alias(libs.plugins.android.application)
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.dagger.hilt.android)
-    kotlin("plugin.serialization") version "2.1.0"
-    alias(libs.plugins.jetbrains.kotlin.android)
-    // id("com.google.protobuf") version "0.9.5" // Eliminado plugin de Protobuf
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    // REQUIRED for Kotlin 2.0 + Compose:
+    id("org.jetbrains.kotlin.plugin.compose") 
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -49,10 +48,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "2.1.0"
-        // Para habilitar informes de composición (legibles):
-    }
+   
     buildFeatures {
         compose = true
         buildConfig = true
