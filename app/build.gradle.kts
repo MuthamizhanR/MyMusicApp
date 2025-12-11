@@ -271,3 +271,14 @@ configurations.all {
         }
     }
 }
+
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            // Force stable OkHttp 4.12.0 to fix "Metadata version 2.2.0" error
+            if (requested.group == "com.squareup.okhttp3") {
+                useVersion("4.12.0")
+            }
+        }
+    }
+}
