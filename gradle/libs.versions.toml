@@ -173,8 +173,8 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.2.21" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin"}
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.1.0" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 dagger-hilt-android = { id = "com.google.dagger.hilt.android" , version.ref = "dagger" }
 ksp = { id = "com.google.devtools.ksp", version = "2.2.21-1.0.29" }
