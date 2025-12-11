@@ -1,8 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    // Android Gradle Plugin 8.5.2 (Fixes R8 metadata issues with newer Kotlin)
-    id("com.android.application") version "8.5.2" apply false
-    id("com.android.library") version "8.5.2" apply false
+    // Android Gradle Plugin 8.7.3 (Fixes R8 metadata issues with newer Kotlin)
+    id("com.android.application") version "8.7.3" apply false
+    id("com.android.library") version "8.7.3" apply false
 
     // Kotlin 2.0.0 (Modern standard, aligns with your Compose Compiler usage)
     id("org.jetbrains.kotlin.android") version "2.0.0" apply false
